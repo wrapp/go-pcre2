@@ -2,12 +2,6 @@ package pcre2
 
 import "errors"
 
-// Regexp represents a compiled regular expression. Internally
-// it wraps a reference to `pcre2_code` type.
-type Regexp struct {
-	pattern string
-	ptr uintptr // *C.pcre2_code
-}
 
 var (
 	// ErrInvalidRegexp is returned when the provided Regexp is

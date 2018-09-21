@@ -31,7 +31,14 @@ import (
 	"reflect"
 	"unicode/utf8"
 	"unsafe"
-)
+	)
+
+// Regexp represents a compiled regular expression. Internally
+// it wraps a reference to `pcre2_code` type.
+type Regexp struct {
+	pattern string
+	ptr *C.struct_pcre2_real_code_32
+}
 
 // Error returns the string representation of the error.
 func (e ErrCompile) Error() string {
@@ -99,8 +106,16 @@ func Compile(pattern string) (*Regexp, error) {
 	}
 	return &Regexp{
 		pattern: pattern,
-		ptr:     uintptr(unsafe.Pointer(re)),
+		ptr:     re,
 	}, nil
+}
+
+func JITCompile(rexp *Regexp) error {
+	res := C.pcre2_jit_compile((*C.struct_pcre2_real_code_32)(rexp.ptr), C.PCRE2_JIT_COMPLETE)
+	if res != 0 {
+		return fmt.Errorf("JIT didn't JIT: %d", res)
+	}
+	return nil
 }
 
 // MustCompile is like Compile but panics if the expression cannot be
@@ -118,8 +133,8 @@ func (r *Regexp) validRegexpPtr() (*C.pcre2_code, error) {
 		return nil, ErrInvalidRegexp
 	}
 
-	if rptr := r.ptr; rptr != 0 {
-		return (*C.pcre2_code)(unsafe.Pointer(rptr)), nil
+	if rptr := r.ptr; rptr != nil {
+		return (*C.pcre2_code)(rptr), nil
 	}
 	return nil, ErrInvalidRegexp
 }
@@ -131,7 +146,7 @@ func (r *Regexp) Free() error {
 		return err
 	}
 	C.pcre2_code_free(rptr)
-	r.ptr = 0
+	r.ptr = nil
 	return nil
 }
 

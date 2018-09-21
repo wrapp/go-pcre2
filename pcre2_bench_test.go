@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/lestrrat/go-pcre2"
+	"github.com/wrapp/go-pcre2"
 )
 
 type regexper interface {

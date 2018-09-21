@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/lestrrat/go-pcre2"
+	"github.com/wrapp/go-pcre2"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,6 +15,15 @@ func TestBadPattern(t *testing.T) {
 		return
 	}
 	defer re.Free()
+}
+func TestJITCompile(t *testing.T) {
+	re, err := pcre2.Compile(`^Hello (.+)!$`)
+	if !assert.NoError(t, err, "Compile works") {
+		return
+	}
+	defer re.Free()
+
+	assert.NoError(t, pcre2.JITCompile(re))
 }
 
 func TestBasic(t *testing.T) {
