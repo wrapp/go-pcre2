@@ -29,6 +29,7 @@ import "C"
 import (
 	"fmt"
 	"reflect"
+	"runtime"
 	"unicode/utf8"
 	"unsafe"
 	)
@@ -104,16 +105,21 @@ func Compile(pattern string) (*Regexp, error) {
 			message: string(msg),
 		}
 	}
-	return &Regexp{
+
+	rexp := Regexp{
 		pattern: pattern,
 		ptr:     re,
-	}, nil
+	}
+
+	runtime.SetFinalizer(&rexp, func(re *Regexp) {re.Free()})
+
+	return &rexp, nil
 }
 
 func JITCompile(rexp *Regexp) error {
 	res := C.pcre2_jit_compile((*C.struct_pcre2_real_code_32)(rexp.ptr), C.PCRE2_JIT_COMPLETE)
 	if res != 0 {
-		return fmt.Errorf("JIT didn't JIT: %d", res)
+		return fmt.Errorf("JIT didn't JIT: %d", (int)(res))
 	}
 	return nil
 }
