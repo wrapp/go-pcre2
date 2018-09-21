@@ -116,8 +116,8 @@ func Compile(pattern string) (*Regexp, error) {
 	return &rexp, nil
 }
 
-func JITCompile(rexp *Regexp) error {
-	res := C.pcre2_jit_compile((*C.struct_pcre2_real_code_32)(rexp.ptr), C.PCRE2_JIT_COMPLETE)
+func (r *Regexp)JITCompile(option int) error {
+	res := C.pcre2_jit_compile((*C.struct_pcre2_real_code_32)(r.ptr), (C.uint)(option))
 	if res != 0 {
 		return fmt.Errorf("JIT didn't JIT: %d", (int)(res))
 	}

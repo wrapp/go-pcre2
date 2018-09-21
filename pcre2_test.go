@@ -23,7 +23,7 @@ func TestJITCompile(t *testing.T) {
 	}
 	defer re.Free()
 
-	assert.NoError(t, pcre2.JITCompile(re))
+	assert.NoError(t, re.JITCompile(pcre2.PCRE2JITComplete))
 }
 
 func TestBasic(t *testing.T) {
